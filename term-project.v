@@ -1273,14 +1273,12 @@ Lemma equivalence_of_compile_curiouser1_and_compile_curiouser1_alt'_aux :
          (tk : list byte_code_instruction -> list byte_code_instruction)
          (sc : nat -> arithmetic_expression)
          (sk : arithmetic_expression -> arithmetic_expression),
-    cont_c tc sc ->
-    cont_k tk sk ->
     (forall (n : nat), tc n = compile_ltr_aux (sc n)) ->
     (forall (ae' : arithmetic_expression), tk (compile_ltr_aux ae') = compile_ltr_aux (sk ae')) ->
     compile_curiouser1_aux ae tc tk = compile_ltr_aux (curiouser1_aux ae sc sk).
 Proof.
   intros ae.
-  induction ae as [n | x | ae1 IHae1 ae2 IHae2]; intros tc tk sc sk C_tc_sc C_tk_sk H_tc_sc H_tk_sk.
+  induction ae as [n | x | ae1 IHae1 ae2 IHae2]; intros tc tk sc sk H_tc_sc H_tk_sk.
   - rewrite -> fold_unfold_compile_curiouser1_aux_Literal.
     rewrite -> fold_unfold_curiouser1_aux_Literal.
     (* if we have a property that states:
@@ -1303,12 +1301,8 @@ Proof.
   - rewrite -> fold_unfold_compile_curiouser1_aux_Plus.
     rewrite -> fold_unfold_curiouser1_aux_Plus.
     apply IHae1.
-    + exact (Cont_C1 _ _ _ _ _ C_tc_sc C_tk_sk).
-    + exact (Cont_K1 _ _ _ C_tk_sk).
     + intros n.
       apply IHae2.
-      * exact (Cont_C2 _ _ _ C_tc_sc).
-      * exact (Cont_K2 _ _ _ C_tk_sk).
       * intros n'.
         exact (H_tc_sc (n + n')).
       * intros ae'.
@@ -1320,8 +1314,6 @@ Proof.
         exact ly.
     + intros ae'.
       apply IHae2.
-      * exact (Cont_C3 _ _ _ _ C_tk_sk).
-      * exact (Cont_K3 _ _ _ _ C_tk_sk).
       * intros n.
         assert (ly := H_tk_sk (Plus ae' (Literal n))).
         rewrite -> fold_unfold_compile_ltr_aux_Plus in ly.
@@ -1352,8 +1344,7 @@ Proof.
            (fun n => PUSH n :: nil)
            (fun bcis => bcis)
            (fun n => Literal n)
-           (fun ae' => ae')
-           Cont_C0 Cont_K0).
+           (fun ae' => ae')).
   assert (H_C : forall (n : nat), PUSH n :: nil = compile_ltr_aux (Literal n)).
   { intros n.
     rewrite -> fold_unfold_compile_ltr_aux_Literal.
@@ -1363,7 +1354,7 @@ Proof.
            (fun bcis => bcis)
            (fun n => Literal n)
            (fun ae' => ae')
-           Cont_C0 Cont_K0 H_C).
+           H_C).
   assert (H_K : forall (ae' : arithmetic_expression), compile_ltr_aux ae' = compile_ltr_aux ae').
   { intros ae'.
     reflexivity. }
@@ -1372,13 +1363,13 @@ Proof.
            (fun bcis => bcis)
            (fun n => Literal n)
            (fun ae' => ae')
-           Cont_C0 Cont_K0 H_C H_K).
+           H_C H_K).
   exact (equivalence_of_compile_curiouser1_and_compile_curiouser1_alt'_aux ae
            (fun n => PUSH n :: nil)
            (fun bcis => bcis)
            (fun n => Literal n)
            (fun ae' => ae')
-           Cont_C0 Cont_K0 H_C H_K).
+           H_C H_K).
 Qed.
 
 (* ********** *)
