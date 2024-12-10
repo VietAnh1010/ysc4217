@@ -1374,48 +1374,102 @@ Qed.
 
 (* ********** *)
 
-(* The commuting diagrams *)
+Definition interpret_curiouser1 (sp : source_program) (e : environment nat) : source_expressible_value :=
+  interpret_ltr (curiouser1 sp) e.
 
-Theorem the_commuting_diagram_ltr_for_curiouser1 :
+Definition interpret_curiouser2 (sp : source_program) (e : environment nat) : source_expressible_value :=
+  interpret_ltr (curiouser2 sp) e.
+
+(* If we compose interpret_ltr and curiouser1/curiouser2,
+   we get back interpret_ltr. The focus is on "what" we do.
+ *)
+Definition interpret_curiouser1_alt (sp : source_program) (e : environment nat) : source_expressible_value :=
+  interpret_ltr sp e.
+
+Definition interpret_curiouser2_alt (sp : source_program) (e : environment nat) : source_expressible_value :=
+  interpret_ltr sp e.
+
+Proposition equivalence_of_interpret_curiouser1_and_interpret_curiouser2 :
   forall (sp : source_program)
          (e : environment nat),
-    same_results
-      (interpret_ltr (curiouser1 sp) e)
-      (run_ltr (compile_curiouser1 sp) e).
+    interpret_curiouser1 sp e =
+    interpret_curiouser2 sp e.
 Proof.
   intros sp e.
-  rewrite -> (curiouser1_preserves_evaluation sp e).
-  rewrite -> (compile_curiouser1_preserves_execution sp e).
-  exact (the_commuting_diagram_ltr sp e).
+  unfold interpret_curiouser1, interpret_curiouser2.
+  rewrite -> (equivalence_of_curiouser1_and_curiouser2 sp).
+  reflexivity.
 Qed.
+
+Proposition equivalence_of_interpret_curiouser1_and_interpret_curiouser1_alt :
+  forall (sp : source_program)
+         (e : environment nat),
+    interpret_curiouser1 sp e =
+    interpret_curiouser1_alt sp e.
+Proof.
+  intros sp e.
+  unfold interpret_curiouser1, interpret_curiouser1_alt.
+  exact (curiouser1_preserves_evaluation sp e).
+Qed.
+
+Proposition equivalence_of_interpret_curiouser2_and_interpret_curiouser2_alt :
+  forall (sp : source_program)
+         (e : environment nat),
+    interpret_curiouser2 sp e =
+    interpret_curiouser2_alt sp e.
+Proof.
+  intros sp e.
+  unfold interpret_curiouser2, interpret_curiouser2_alt.
+  exact (curiouser2_preserves_evaluation sp e).
+Qed.
+
+(* The commuting diagrams *)
 
 Theorem the_commuting_diagram_ltr_for_curiouser1_alt :
   forall (sp : source_program)
          (e : environment nat),
     same_results
-      (interpret_ltr (curiouser1 sp) e)
+      (interpret_curiouser1 sp e)
       (run_ltr (compile_curiouser1_alt sp) e).
 Proof.
   intros sp e.
-  rewrite -> (curiouser1_preserves_evaluation sp e).
-  rewrite -> (compile_curiouser1_alt_preserves_execution sp e).
-  exact (the_commuting_diagram_ltr sp e).
-
-  Restart.
-
-  intros sp e.
-  unfold compile_curiouser1_alt.
+  unfold interpret_curiouser1, compile_curiouser1_alt.
   exact (the_commuting_diagram_ltr (curiouser1 sp) e).
+Qed.
+
+Theorem the_commuting_diagram_ltr_for_curiouser1 :
+  forall (sp : source_program)
+         (e : environment nat),
+    same_results
+      (interpret_curiouser1 sp e)
+      (run_ltr (compile_curiouser1 sp) e).
+Proof.
+  intros sp e.
+  rewrite -> (equivalence_of_compile_curiouser1_and_compile_curiouser1_alt sp).
+  exact (the_commuting_diagram_ltr_for_curiouser1_alt sp e).
+Qed.
+
+Theorem the_commuting_diagram_ltr_for_curiouser1_alt' :
+  forall (sp : source_program)
+         (e : environment nat),
+    same_results
+      (interpret_curiouser1_alt sp e)
+      (run_ltr (compile_curiouser1_alt sp) e).
+Proof.
+  intros sp e.
+  rewrite <- (equivalence_of_interpret_curiouser1_and_interpret_curiouser1_alt sp e).
+  exact (the_commuting_diagram_ltr_for_curiouser1_alt sp e).
 Qed.
 
 Theorem the_commuting_diagram_ltr_for_curiouser2 :
   forall (sp : source_program)
          (e : environment nat),
     same_results
-      (interpret_ltr (curiouser2 sp) e)
+      (interpret_curiouser2 sp e)
       (run_ltr (compile_curiouser2 sp) e).
 Proof.
   intros sp e.
+  unfold interpret_curiouser2.
   rewrite -> (curiouser2_preserves_evaluation sp e).
   rewrite -> (compile_curiouser2_preserves_execution sp e).
   exact (the_commuting_diagram_ltr sp e).
@@ -1425,18 +1479,11 @@ Theorem the_commuting_diagram_ltr_for_curiouser2_alt :
   forall (sp : source_program)
          (e : environment nat),
     same_results
-      (interpret_ltr (curiouser2 sp) e)
+      (interpret_curiouser2 sp e)
       (run_ltr (compile_curiouser2_alt sp) e).
 Proof.
   intros sp e.
-  rewrite -> (curiouser2_preserves_evaluation sp e).
-  rewrite -> (compile_curiouser2_alt_preserves_execution sp e).
-  exact (the_commuting_diagram_ltr sp e).
-
-  Restart.
-
-  intros sp e.
-  unfold compile_curiouser2_alt.
+  unfold interpret_curiouser2.
   exact (the_commuting_diagram_ltr (curiouser2 sp) e).
 Qed.
 
